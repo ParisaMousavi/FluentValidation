@@ -18,12 +18,14 @@
 namespace FluentValidation.AspNetCore {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel.DataAnnotations;
 	using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 	using System.Linq;
 	using System.Reflection;
 	using FluentValidation.Internal;
 	using FluentValidation.Validators;
 	using Microsoft.AspNetCore.Http;
+	using Microsoft.AspNetCore.Mvc.DataAnnotations;
 
 	public delegate IClientModelValidator FluentValidationClientValidatorFactory(ClientValidatorProviderContext context, PropertyRule rule, IPropertyValidator validator);
 
@@ -111,8 +113,9 @@ namespace FluentValidation.AspNetCore {
 				bool fvHasRequiredRule = context.Results.Any(x => x.Validator is RequiredClientValidator);
 
 				if (fvHasRequiredRule) {
+					//TODO: Change this back to an explicit reference to RequiredAttributeAdapter when AspNetCore 3.0 preview 2 comes out.
 					var dataAnnotationsRequiredRule = context.Results
-						.FirstOrDefault(x => x.Validator is Microsoft.AspNetCore.Mvc.DataAnnotations.Internal.RequiredAttributeAdapter);
+						.FirstOrDefault(x => x.Validator is AttributeAdapterBase<RequiredAttribute>);
 					context.Results.Remove(dataAnnotationsRequiredRule);
 				}
 			}
