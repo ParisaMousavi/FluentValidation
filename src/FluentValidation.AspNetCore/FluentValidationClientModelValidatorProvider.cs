@@ -113,9 +113,8 @@ namespace FluentValidation.AspNetCore {
 				bool fvHasRequiredRule = context.Results.Any(x => x.Validator is RequiredClientValidator);
 
 				if (fvHasRequiredRule) {
-					//TODO: Change this back to an explicit reference to RequiredAttributeAdapter when AspNetCore 3.0 preview 2 comes out.
 					var dataAnnotationsRequiredRule = context.Results
-						.FirstOrDefault(x => x.Validator is AttributeAdapterBase<RequiredAttribute>);
+						.FirstOrDefault(x => x.Validator is Microsoft.AspNetCore.Mvc.DataAnnotations.RequiredAttributeAdapter);
 					context.Results.Remove(dataAnnotationsRequiredRule);
 				}
 			}
