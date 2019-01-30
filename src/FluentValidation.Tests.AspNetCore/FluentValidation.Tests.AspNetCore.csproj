@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1;netcoreapp2.2;netcoreapp3.0;net462</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)'=='Unix'">netcoreapp3.0</TargetFrameworks>
