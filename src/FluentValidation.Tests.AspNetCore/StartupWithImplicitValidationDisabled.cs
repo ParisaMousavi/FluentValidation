@@ -22,10 +22,16 @@ namespace FluentValidation.Tests.AspNetCore {
         {
             services.AddMvc(setup => {
                 
-            }).AddFluentValidation(cfg => {
+            })
+#if NETCOREAPP3_0
+	        .AddNewtonsoftJson()
+#endif           
+			.AddFluentValidation(cfg => {
 	            cfg.ValidatorFactoryType = typeof(AttributedValidatorFactory);
 	            cfg.ImplicitlyValidateChildProperties = false;
             });
+	        
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
