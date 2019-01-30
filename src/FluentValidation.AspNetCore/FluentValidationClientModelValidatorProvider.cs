@@ -25,8 +25,11 @@ namespace FluentValidation.AspNetCore {
 	using FluentValidation.Internal;
 	using FluentValidation.Validators;
 	using Microsoft.AspNetCore.Http;
+#if NETSTANDARD2_0
+	using Microsoft.AspNetCore.Mvc.DataAnnotations.Internal;
+#else 
 	using Microsoft.AspNetCore.Mvc.DataAnnotations;
-
+#endif
 	public delegate IClientModelValidator FluentValidationClientValidatorFactory(ClientValidatorProviderContext context, PropertyRule rule, IPropertyValidator validator);
 
 	/// <summary>
@@ -114,7 +117,7 @@ namespace FluentValidation.AspNetCore {
 
 				if (fvHasRequiredRule) {
 					var dataAnnotationsRequiredRule = context.Results
-						.FirstOrDefault(x => x.Validator is Microsoft.AspNetCore.Mvc.DataAnnotations.RequiredAttributeAdapter);
+						.FirstOrDefault(x => x.Validator is RequiredAttributeAdapter);
 					context.Results.Remove(dataAnnotationsRequiredRule);
 				}
 			}
