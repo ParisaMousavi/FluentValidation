@@ -24,7 +24,11 @@ namespace FluentValidation.Tests.AspNetCore {
         {
             services.AddMvc(setup => {
                 
-            }).AddFluentValidation(cfg => {
+            })
+#if NETCOREAPP3_0
+			.AddNewtonsoftJson()
+#endif              
+			.AddFluentValidation(cfg => {
 	            cfg.ValidatorFactoryType = typeof(AttributedValidatorFactory);
 	            cfg.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
             });

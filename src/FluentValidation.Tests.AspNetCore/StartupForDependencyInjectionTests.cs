@@ -20,7 +20,11 @@ namespace FluentValidation.Tests.AspNetCore {
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services) {
-			services.AddMvc().AddFluentValidation(fv => {
+			services.AddMvc()
+#if NETCOREAPP3_0
+			.AddNewtonsoftJson()
+#endif
+			.AddFluentValidation(fv => {
 				fv.ImplicitlyValidateChildProperties = false;
 			});
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
