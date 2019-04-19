@@ -13,7 +13,11 @@ namespace FluentValidation.Tests.AspNetCore {
 	public class StartupWithContainer {
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services) {
-			services.AddMvc(setup => { })
+			services.AddMvc(setup => {
+#if NETCOREAPP3_0
+					setup.EnableEndpointRouting = false;
+#endif
+				})
 #if NETCOREAPP3_0
 				.AddNewtonsoftJson()
 #endif
@@ -42,7 +46,11 @@ namespace FluentValidation.Tests.AspNetCore {
 	public class StartupWithContainerWithoutHttpContextAccessor {
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services) {
-			services.AddMvc(setup => { }).AddFluentValidation(cfg => { cfg.RegisterValidatorsFromAssemblyContaining<TestController>(); });
+			services.AddMvc(setup => {
+#if NETCOREAPP3_0
+				setup.EnableEndpointRouting = false;
+#endif
+			}).AddFluentValidation(cfg => { cfg.RegisterValidatorsFromAssemblyContaining<TestController>(); });
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

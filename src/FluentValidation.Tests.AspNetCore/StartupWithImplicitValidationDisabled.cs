@@ -13,7 +13,9 @@ namespace FluentValidation.Tests.AspNetCore {
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc(setup => {
-                
+#if NETCOREAPP3_0
+		            setup.EnableEndpointRouting = false;
+#endif
             })
 #if NETCOREAPP3_0
 	        .AddNewtonsoftJson()
