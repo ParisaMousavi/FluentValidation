@@ -1,5 +1,9 @@
 {
     "sdk": {
       "version": "3.0.100-preview4-011223"
+    },
+    "others": {
+      "2.1": "latest",
+      "2.2": "latest"
     }
 }

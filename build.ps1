@@ -124,40 +124,42 @@ target decrypt-private-key {
 }
 
 target install-dotnet-core {
-  # Ensures that .net core is up to date.
-  # first get the required version from global.json
+  # Version check as $IsWindows, $IsLinux etc are not defined in PS 5, only PS Core.
+  $win = (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows)
   $json = ConvertFrom-Json (Get-Content "$path/global.json" -Raw)
   $required_version = $json.sdk.version
+  # If there's a version mismatch with what's defined in global.json then a 
+  # call to dotnet --version will generate an error. AppVeyor vs local seem to have different
+  # behaviours handling exit codes (appveyor will immediately halt execution on windows, but not linux)
+  # so the simplest workaround is to write the output to a file and read it back rathre than rely on exit codes. 
+  try { dotnet --version 2>&1>$null } catch { $install_sdk = $true }
+  
+  if ($global:LASTEXITCODE) {
+    $install_sdk = $true;
+    $global:LASTEXITCODE = 0;
+  }
 
-  # Running dotnet --version stupidly fails if the required SDK version is higher 
-  # than the currently installed version. So move global.json out the way 
-  # and then put it back again 
-  Rename-Item "$path/global.json" "$path/global.json.bak"
-  $current_version = (dotnet --version)
-  Rename-Item "$path/global.json.bak" "$path/global.json"
-  Write-Host "Required .NET version: $required_version Installed: $current_version"
-
-  if ($current_version -lt $required_version) {
-    # Current installed version is too low.
-    # Install new version as a local only dependency. 
-
-    if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
-      $urlCurrent = "https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$required_version/dotnet-sdk-$required_version-win-x64.zip"
-      Write-Host "Installing .NET Core $required_version from $urlCurrent"
-      $env:DOTNET_INSTALL_DIR = "$path/.dotnetsdk"
-      New-Item -Type Directory $env:DOTNET_INSTALL_DIR -Force | Out-Null
-      (New-Object System.Net.WebClient).DownloadFile($urlCurrent, "dotnet.zip")
-      Write-Host "Unzipping to $env:DOTNET_INSTALL_DIR"
-      Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory("dotnet.zip", $env:DOTNET_INSTALL_DIR)
+  if ($install_sdk) {
+    $installer = $null;
+    if ($win) {
+      $installer = "$path/dotnet-installer.ps1" 
+      (New-Object System.Net.WebClient).DownloadFile("https://dot.net/v1/dotnet-install.ps1", $installer);
     }
-    elseif ($IsLinux) {
-      $urlCurrent = "https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$required_version/dotnet-sdk-$required_version-linux-x64.tar.gz"
-      Write-Host "Installing .NET Core $required_version from $urlCurrent"
-      $env:DOTNET_INSTALL_DIR = "$path/.dotnetsdk/"
-      mkdir "$path/.dotnetsdk/"
-      (New-Object System.Net.WebClient).DownloadFile($urlCurrent, "$path/dotnet.tar.gz")
-      Write-Host "Unzipping to $env:DOTNET_INSTALL_DIR"
-      tar zxf "$path/dotnet.tar.gz" -C $env:DOTNET_INSTALL_DIR # Use tar directly instead of System.IO.Compression
+    else { 
+      $installer = "$path/dotnet-installer"
+      (New-Object System.Net.WebClient).DownloadFile("https://dot.net/v1/dotnet-install.sh", $installer); 
+      chmod +x dotnet-installer
+    }
+
+    # Extract the channel from the minimum required version.
+    $bits = $json.sdk.version.split(".")
+    $channel = $bits[0] + "." + $bits[1];
+    Write-Host Installing $json.sdk.version from $channel
+    . $installer -i "$path/.dotnetsdk" -c $channel -v $json.sdk.version
+    # Install any other SDKs required. 
+    $json.others.PSObject.Properties | Foreach-Object {
+      Write-Host Installing $_.Value from $_.Name
+      . $installer -i "$path/.dotnetsdk" -c $_.Name -v $_.Value
     }
   }
 }
@@ -170,7 +172,7 @@ target find-sdk {
     if (($PSVersionTable.PSVersion.Major -le 5) -or $IsWindows) {
       $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
     }
-    elseif ($IsLinux) {
+    else {
       # Linux uses colon not semicolon, so can't use string interpolation
       $env:PATH = $env:DOTNET_INSTALL_DIR + ":" + $env:PATH
     }
