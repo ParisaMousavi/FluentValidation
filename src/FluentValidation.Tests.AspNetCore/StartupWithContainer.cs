@@ -9,9 +9,12 @@ namespace FluentValidation.Tests.AspNetCore {
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.DependencyInjection;
 	using Microsoft.Extensions.Logging;
+#if !NETCOREAPP3_0
+using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#endif 
 
 	public class StartupWithContainer {
-		public StartupWithContainer(IHostingEnvironment env) {
+		public StartupWithContainer(IWebHostEnvironment env) {
 			var builder = new ConfigurationBuilder();
 			Configuration = builder.Build();
 		}
@@ -30,7 +33,7 @@ namespace FluentValidation.Tests.AspNetCore {
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory) {
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory) {
 			CultureInfo cultureInfo = new CultureInfo("en-US");
 			app.UseRequestLocalization(options => {
 				options.DefaultRequestCulture = new RequestCulture(cultureInfo);
@@ -47,7 +50,7 @@ namespace FluentValidation.Tests.AspNetCore {
 	}
 
 	public class StartupWithContainerWithoutHttpContextAccessor {
-		public StartupWithContainerWithoutHttpContextAccessor(IHostingEnvironment env) {
+		public StartupWithContainerWithoutHttpContextAccessor(IWebHostEnvironment env) {
 			var builder = new ConfigurationBuilder();
 			Configuration = builder.Build();
 		}
@@ -60,7 +63,7 @@ namespace FluentValidation.Tests.AspNetCore {
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory) {
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory) {
 			CultureInfo cultureInfo = new CultureInfo("en-US");
 			app.UseRequestLocalization(options => {
 				options.DefaultRequestCulture = new RequestCulture(cultureInfo);

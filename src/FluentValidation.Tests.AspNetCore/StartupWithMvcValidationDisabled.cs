@@ -8,10 +8,13 @@ namespace FluentValidation.Tests.AspNetCore {
 	using FluentValidation.Attributes;
 	using System.Globalization;
 	using Microsoft.AspNetCore.Localization;
+#if !NETCOREAPP3_0
+using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+#endif 
 
 	public class StartupWithMvcValidationDisabled
     {
-        public StartupWithMvcValidationDisabled(IHostingEnvironment env)
+        public StartupWithMvcValidationDisabled(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder();
             Configuration = builder.Build();
@@ -35,7 +38,7 @@ namespace FluentValidation.Tests.AspNetCore {
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             CultureInfo cultureInfo = new CultureInfo("en-US");
             app.UseRequestLocalization(options => {
