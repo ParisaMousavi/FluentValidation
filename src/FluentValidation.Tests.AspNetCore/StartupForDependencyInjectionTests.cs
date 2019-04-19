@@ -9,18 +9,8 @@ namespace FluentValidation.Tests.AspNetCore {
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.DependencyInjection;
 	using Microsoft.Extensions.Logging;
-#if !NETCOREAPP3_0
-using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#endif 
 
 	public class StartupForDependencyInjectionTests {
-		public StartupForDependencyInjectionTests(IWebHostEnvironment env) {
-			var builder = new ConfigurationBuilder();
-			Configuration = builder.Build();
-		}
-
-		public IConfigurationRoot Configuration { get; }
-
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services) {
 			services.AddMvc()
@@ -37,7 +27,7 @@ using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory) {
+		public void Configure(IApplicationBuilder app) {
 			CultureInfo cultureInfo = new CultureInfo("en-US");
 			app.UseRequestLocalization(options => {
 				options.DefaultRequestCulture = new RequestCulture(cultureInfo);

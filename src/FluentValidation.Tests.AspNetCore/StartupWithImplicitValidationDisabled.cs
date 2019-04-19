@@ -6,20 +6,9 @@ namespace FluentValidation.Tests.AspNetCore {
 	using Microsoft.Extensions.Logging;
 	using FluentValidation.AspNetCore;
 	using FluentValidation.Attributes;
-#if !NETCOREAPP3_0
-using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#endif 
 
 	public class StartupWithImplicitValidationDisabled
     {
-        public StartupWithImplicitValidationDisabled(IWebHostEnvironment env)
-        {
-            var builder = new ConfigurationBuilder();
-            Configuration = builder.Build();
-        }
-
-        public IConfigurationRoot Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -38,7 +27,7 @@ using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseMvc(routes =>
             {
