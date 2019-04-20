@@ -156,10 +156,19 @@ target install-dotnet-core {
     $channel = $bits[0] + "." + $bits[1];
     Write-Host Installing $json.sdk.version from $channel
     . $installer -i "$path/.dotnetsdk" -c $channel -v $json.sdk.version
-    # Install any other SDKs required. 
+
+    # Collect installed SDKs.
+    $sdks = dotnet --list-sdks | ForEach-Object { 
+      $version = $_.Split(" ")[0].Split(".")
+      $version[0] + "." + $version[1];
+    }
+    
+    # Install any other SDKs required. Only bother installing if not installed already. 
     $json.others.PSObject.Properties | Foreach-Object {
-      Write-Host Installing $_.Value from $_.Name
-      . $installer -i "$path/.dotnetsdk" -c $_.Name -v $_.Value
+      if (!($sdks -contains $_.Name)) {
+        Write-Host Installing $_.Value from $_.Name
+        . $installer -i "$path/.dotnetsdk" -c $_.Name -v $_.Value
+      }
     }
   }
 }
